@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import ConnectionRequest from '../models/ConnectionRequest';
 import User from '../models/User';
-import redisClient from '../config/redis';
+// import redisClient from '../config/redis';
 
 export const sendConnectionRequest = async (req: Request | any, res: Response) => {
   const { recipientId } = req.body;
@@ -55,8 +55,8 @@ export const acceptConnectionRequest = async (req: Request | any, res: Response)
     });
 
     // Invalidate cache
-    await redisClient.del(`connections:${userId}`);
-    await redisClient.del(`connections:${connectionRequest.user_id}`);
+    // await redisClient.del(`connections:${userId}`);
+    // await redisClient.del(`connections:${connectionRequest.user_id}`);
 
     res.status(200).json({ message: 'Connection request accepted' });
   } catch (error) {
@@ -85,8 +85,8 @@ export const rejectConnectionRequest = async (req: Request | any, res: Response)
       $pull: { connection_requests: requestId },
     });
 
-    // Invalidate cache
-    await redisClient.del(`connections:${userId}`);
+    // // Invalidate cache
+    // await redisClient.del(`connections:${userId}`);
 
     res.status(200).json({ message: 'Connection request rejected' });
   } catch (error) {
@@ -109,8 +109,8 @@ export const removeConnection = async (req: Request | any, res: Response) => {
     });
 
     // Invalidate cache
-    await redisClient.del(`connections:${userId}`);
-    await redisClient.del(`connections:${connectionId}`);
+    // await redisClient.del(`connections:${userId}`);
+    // await redisClient.del(`connections:${connectionId}`);
 
     res.status(200).json({ message: 'Connection removed' });
   } catch (error) {
@@ -142,9 +142,9 @@ export const getConnectionsList = async (req: Request | any, res: Response) => {
     }
 
     // Cache connections
-    await redisClient.set(`connections:${userId}`, JSON.stringify(user.connections), {
-      EX: 3600,
-    });
+    // await redisClient.set(`connections:${userId}`, JSON.stringify(user.connections), {
+    //   EX: 3600,
+    // });
 
     res.status(200).json(user.connections);
   } catch (error) {

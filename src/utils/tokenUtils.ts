@@ -5,7 +5,7 @@ const ACCESS_TOKEN_SECRET = 'sdfjkbtekb6jkb6b';
 const REFRESH_TOKEN_SECRET = 'dmgileuteuethin34';
 
 export const generateAccessToken = (userId: string | any) => {
-  return jwt.sign({ userId }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+  return jwt.sign({ userId }, ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
 };
 
 export const generateRefreshToken = (userId: string  | any) => {

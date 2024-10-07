@@ -1,7 +1,7 @@
 // /controllers/userController.ts
 import { Request, Response } from 'express';
 import User from '../models/User';
-import redisClient from '../config/redis';
+// import redisClient from '../config/redis';
 
 export const getUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
@@ -14,9 +14,9 @@ export const getUser = async (req: Request, res: Response) => {
     }
 
     // Cache the user data in Redis
-    await redisClient.set(`user:${userId}`, JSON.stringify(user), {
-      EX: 3600, // Cache expiration time in seconds (e.g., 1 hour)
-    });
+    // await redisClient.set(`user:${userId}`, JSON.stringify(user), {
+    //   EX: 3600, // Cache expiration time in seconds (e.g., 1 hour)
+    // });
 
     res.status(200).json(user);
   } catch (error) {
@@ -40,9 +40,9 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     // Update the cache with the new user data
-    await redisClient.set(`user:${userId}`, JSON.stringify(updatedUser), {
-      EX: 3600,
-    });
+    // await redisClient.set(`user:${userId}`, JSON.stringify(updatedUser), {
+    //   EX: 3600,
+    // });
 
     res.status(200).json(updatedUser);
   } catch (error) {

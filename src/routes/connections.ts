@@ -1,7 +1,7 @@
 // /routes/users.ts
 import { Router } from 'express';
 import { authenticateToken } from '../middlewares/authMiddlewares';
-import { connectionsCacheMiddleware } from '../middlewares/cacheMiddleware';
+// import { connectionsCacheMiddleware } from '../middlewares/cacheMiddleware';
 import {
   sendConnectionRequest,
   acceptConnectionRequest,
@@ -18,6 +18,6 @@ router.post('/accept', authenticateToken, acceptConnectionRequest);
 router.post('/reject', authenticateToken, rejectConnectionRequest);
 router.delete('/:connectionId', authenticateToken, removeConnection);
 router.get('/requests', authenticateToken, getConnectionRequests);
-router.get('/', authenticateToken, connectionsCacheMiddleware, getConnectionsList);
+router.get('/', authenticateToken, getConnectionsList);
 
 export default router;

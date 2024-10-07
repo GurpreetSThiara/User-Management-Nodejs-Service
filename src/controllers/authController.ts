@@ -3,103 +3,87 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import User, { IUser } from '../models/User';
 import { generateAccessToken, generateRefreshToken } from '../utils/tokenUtils';
-import redisClient from '../config/redis';
+import { SuccessResponse, FailedResponse } from '../utils/responseUtils';
 
 export const register = async (req: Request, res: Response) => {
-  const {
-    first_name,
-    last_name,
-    email,
-    password,
-    profile_image,
-    headline,
-    summary,
-    experience = [],
-    education = [],
-    skills = [],
-    location,
-  } = req.body;
+  const { first_name, last_name, password, username ,email} = req.body;
 
   try {
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return FailedResponse(res, 'User with this email already exists', 400);
+    }
 
-    // Create a new user with all fields
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
       first_name,
       last_name,
+      username,
+      lastLogin: new Date(),
       email,
       password: hashedPassword,
-      profile_image,
-      headline,
-      summary,
-      experience,
-      education,
-      skills,
-      location,
-      connections: [], // Initialize as an empty array
-      connection_requests: [], // Initialize as an empty array
       settings: {
-        visibility: 'public', // Default value
+        visibility: 'public',
         notifications: {
-          email_notifications: true, // Default value
-          sms_notifications: false, // Default value
+          email_notifications: true,
+          sms_notifications: false,
         },
       },
       created_at: new Date(),
       updated_at: new Date(),
     });
 
-    // Save the user to the database
     await user.save();
-
-    res.status(201).json({ message: 'User registered successfully' });
+    return SuccessResponse(res, 'User registered successfully', { user });
   } catch (error) {
-    res.status(500).json({ error: 'Registration failed' });
+    console.log(error)
+    return FailedResponse(res, 'Registration failed');
   }
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   try {
-    const user : any = await User.findOne({ email });
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    const user = await User.findOne({ username });
+    if (!user) return FailedResponse(res, 'Invalid credentials', 401);
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!isMatch) return FailedResponse(res, 'Invalid credentials', 401);
 
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    // Use findOneAndUpdate to update lastLogin in one operation
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id }, 
+      { lastLogin: new Date() }, 
+      { new: true } // Option to return the updated document
+    );
 
-    // Store refresh token in Redis
-    await redisClient.set(user._id.toString(), refreshToken);
+    if(!updatedUser){
+      return FailedResponse(res,'something went wrong');
+    }
+    const accessToken = generateAccessToken(updatedUser._id);
+    const refreshToken = generateRefreshToken(updatedUser._id);
 
-    // Cache user data
-    await redisClient.set(`user:${user._id}`, JSON.stringify(user), {
-      EX: 3600,
-    });
+    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'strict' });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict' });
 
-    // Set tokens in cookies
-    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    const { password: _, ...userData } = updatedUser.toObject();
+    console.log(updatedUser);
 
-    res.status(200).json({ message: 'Logged in successfully' });
+    return SuccessResponse(res, 'Logged in successfully', { user: userData });
   } catch (error) {
-    res.status(500).json({ error: 'Login failed' });
+    return FailedResponse(res, 'Login failed');
   }
 };
+
+
 export const logout = async (req: Request, res: Response) => {
   const { userId } = req.body;
   try {
-    // Delete refresh token from Redis
-    await redisClient.del(userId);
-
-    // Clear cookies
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
 
-    res.status(200).json({ message: 'Logged out successfully' });
+    return SuccessResponse(res, 'Logged out successfully');
   } catch (error) {
-    res.status(500).json({ error: 'Logout failed' });
+    return FailedResponse(res, 'Logout failed');
   }
 };
