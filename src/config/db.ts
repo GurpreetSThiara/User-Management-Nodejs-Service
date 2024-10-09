@@ -1,6 +1,7 @@
 // db.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { loadAllModels } from '../utils/loadModels';
 
 dotenv.config();
 
@@ -10,6 +11,9 @@ const connectDB = async () => {
       dbName: 'peoples',
     });
     console.log('MongoDB connected to database "peoples"');
+   await loadAllModels();
+
+    console.log("models loaded")
 
 
     mongoose.connection.on('connected', () => {

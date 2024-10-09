@@ -87,3 +87,5 @@ export const logout = async (req: Request, res: Response) => {
     return FailedResponse(res, 'Logout failed');
   }
 };
+
+

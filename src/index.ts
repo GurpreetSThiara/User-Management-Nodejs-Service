@@ -9,6 +9,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 // import notificationRoutes from './routes/notifications';
 import dotenv from 'dotenv';
+import modelRoutes from './routes/modelRoutes';
+import crudModelRecordRoutes from './routes/crudModelRecordRoutes'
 
 dotenv.config();
 connectDb();
@@ -26,6 +28,11 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/connections', connectionRoutes);
+
+
+app.use('/api/v1/models', modelRoutes);
+app.use('/api/v1/records', crudModelRecordRoutes);
+
 // app.use('/api/notifications', notificationRoutes);
 
 // Connect to MongoDB and start server

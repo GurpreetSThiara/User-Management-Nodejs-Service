@@ -40,3 +40,25 @@ export const getAllUsers = async (req: Request | any, res: Response) => {
     return FailedResponse(res, 'Failed to retrieve users. Please try again later.', 500);
   }
 };
+
+
+export const getUserByUsername = async (req: Request | any, res: Response) => {
+  try {
+    if (!req.admin) {
+      return FailedResponse(res, 'Forbidden: You do not have admin privileges.', 403);
+    }
+
+    const { username } = req.params;
+
+    const user = await User.findOne({ username }, '-password');
+
+    if (!user) {
+      return FailedResponse(res, 'User not found.', 404);
+    }
+
+    return SuccessResponse(res, 'User retrieved successfully.', { user });
+  } catch (error) {
+    console.error(error);
+    return FailedResponse(res, 'Failed to retrieve user. Please try again later.', 500);
+  }
+};
