@@ -37,7 +37,7 @@ export const register = async (req: Request, res: Response) => {
     return SuccessResponse(res, 'User registered successfully', { user });
   } catch (error) {
     console.log(error)
-    return FailedResponse(res, 'Registration failed');
+    return FailedResponse(res, 'Registration failed',400);
   }
 };
 
@@ -45,10 +45,13 @@ export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   try {
     const user = await User.findOne({ username });
+    console.log(username)
+    console.log(user)
     if (!user) return FailedResponse(res, 'Invalid credentials', 401);
-
+   console.log(password)
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return FailedResponse(res, 'Invalid credentials', 401);
+    console.log(password)
 
     // Use findOneAndUpdate to update lastLogin in one operation
     const updatedUser = await User.findOneAndUpdate(
@@ -63,14 +66,18 @@ export const login = async (req: Request, res: Response) => {
     const accessToken = generateAccessToken(updatedUser._id);
     const refreshToken = generateRefreshToken(updatedUser._id);
 
+
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, sameSite: 'strict' });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict' });
 
     const { password: _, ...userData } = updatedUser.toObject();
     console.log(updatedUser);
+    console.log("fine")
 
     return SuccessResponse(res, 'Logged in successfully', { user: userData });
   } catch (error) {
+    console.log(error)
+    console.log("error")
     return FailedResponse(res, 'Login failed');
   }
 };

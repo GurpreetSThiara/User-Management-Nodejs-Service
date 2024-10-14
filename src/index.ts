@@ -13,7 +13,7 @@ import modelRoutes from './routes/modelRoutes';
 import crudModelRecordRoutes from './routes/crudModelRecordRoutes'
 
 dotenv.config();
-connectDb();
+// connectDb();
 
 const app = express();
 app.use(cookieParser());
@@ -36,7 +36,7 @@ app.use('/api/v1/records', crudModelRecordRoutes);
 // app.use('/api/notifications', notificationRoutes);
 
 // Connect to MongoDB and start server
-const PORT = process.env.PORT ?? 3000;
+const PORT = process.env.PORT ?? 3001;
 // mongoose.connection.once('open', () => {
 //   console.log('Connected to MongoDB');
 
@@ -46,6 +46,8 @@ app.use('/',(req,res)=>{
   res.status(200).send({"success":true,"message":"Server is working"})
 })
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+
+export default app

@@ -7,7 +7,7 @@ export const getAllUsers = async (req: Request | any, res: Response) => {
   try {
 
     if (!req.admin) {
-      return FailedResponse(res, 'Forbidden: You do not have admin privileges.', 403);
+      return FailedResponse(res, 'Forbidden: You do not have admin privileges', 403);
     }
 
     const page = parseInt(req.query.page as string, 10) || 1;
@@ -25,7 +25,7 @@ export const getAllUsers = async (req: Request | any, res: Response) => {
     // Return paginated results and total count
     const totalPages = Math.ceil(totalUsers / limit);
 
-    return SuccessResponse(res, 'Users retrieved successfully.',{
+    return SuccessResponse(res, 'Users retrieved successfully',{
      
       users,
       meta: {
@@ -56,7 +56,7 @@ export const getUserByUsername = async (req: Request | any, res: Response) => {
       return FailedResponse(res, 'User not found.', 404);
     }
 
-    return SuccessResponse(res, 'User retrieved successfully.', { user });
+    return SuccessResponse(res, 'User retrieved successfully', { user });
   } catch (error) {
     console.error(error);
     return FailedResponse(res, 'Failed to retrieve user. Please try again later.', 500);

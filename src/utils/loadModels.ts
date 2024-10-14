@@ -26,6 +26,6 @@ export const loadAllModels = async () => {
 
     console.log('All dynamic models loaded successfully.');
   } catch (error) {
-    console.error('Error loading dynamic models:', error);
+    console.log('Error loading dynamic models:', error);
   }
 };
