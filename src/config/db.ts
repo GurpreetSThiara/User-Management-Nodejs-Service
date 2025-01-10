@@ -11,7 +11,7 @@ const connectDB = async () => {
       dbName: 'peoples',
     });
     console.log('MongoDB connected to database "peoples"');
-  // await loadAllModels();
+  await loadAllModels();
 
     console.log("models loaded")
 

@@ -69,7 +69,7 @@ export const createModel = async (req: Request | any, res: Response) => {
     const schema = createSchemaFromFields(newModelDefinition.fields)
     mongoose.model(modelName, schema, modelName.toLowerCase());
     models[name] = createDynamicModel(name);
-    res.status(201).json({ message: 'Model created successfully' });
+    res.status(200).json({ message: 'Model created successfully' });
   } catch (error) {
     console.error('Error creating model:', error);
     res.status(500).json({ message: 'Server error' });
@@ -90,24 +90,30 @@ export const addField = async (req: Request, res: Response) => {
     }
 
     if (!mongooseTypeMap[metadata.type]) {
+      console.log("invalid feild type")
       return res.status(400).json({ message: 'Invalid field type' });
     }
 
     // If the field type is ObjectId and ref is provided, ensure ref is a string (model name)
     if (metadata.type === 'ObjectId') {
       if (!metadata.ref || typeof metadata.ref !== 'string') {
+        console.log("A valid ref (model name) is required for ObjectId type")
+
         return res.status(400).json({ message: 'A valid ref (model name) is required for ObjectId type' });
       }
 
       // Optionally, verify that the referenced model exists
       if (!mongoose.modelNames().includes(metadata.ref)) {
+        console.log(`Referenced model "${metadata.ref}" does not exist`)
         return res.status(400).json({ message: `Referenced model "${metadata.ref}" does not exist` });
       }
     }
 
+    
     // Find the model definition within the session
     const modelDefinition = await ModelDefinition.findOne({ name: modelName }).session(session);
     if (!modelDefinition) {
+      console.log("404")
       return res.status(404).json({ message: 'Model not found' });
     }
 
@@ -134,7 +140,7 @@ export const addField = async (req: Request, res: Response) => {
     await session.commitTransaction();
     session.endSession(); // End the session
 
-    res.json({ message: 'Field added successfully' });
+    res.status(200).json({ message: 'Field added successfully' });
   } catch (error) {
     await session.abortTransaction(); // Rollback the transaction on error
     session.endSession(); // End the session

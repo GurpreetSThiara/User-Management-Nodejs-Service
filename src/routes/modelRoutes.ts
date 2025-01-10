@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', getModels);
 router.post('/', createModel);
 router.post('/:modelName/fields', addField);
-router.post('/:modelName/relationships', addRelationship);
+// router.post('/:modelName/relationships', addRelationship);
 
 
 export default router;

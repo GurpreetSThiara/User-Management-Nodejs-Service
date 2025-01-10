@@ -5,12 +5,12 @@ import app from "../../src/index";
 import bcrypt from "bcrypt";
 import exp from "constants";
 
-describe("admin routes", () => {
+describe("admin model routes", () => {
   let adminCookie: string[] = [];
 
   beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URI as string, {
-      dbName: "peoples_models",
+      dbName: "peoples_models_test",
     });
     await User.deleteMany({});
     const  pass = await bcrypt.hash("123456", 10);
@@ -43,36 +43,10 @@ describe("admin routes", () => {
     await mongoose.connection.close();
   });
 
-  describe("GET /api/v1/admin/all", () => {
-    it("should login the admin", async () => {
-      const res = await request(app).post("/api/v1/auth/login").send({
-        username: "admin2",
-        password: "123456",
-      });
-      expect(res.status).toBe(200);
-      expect(res.headers["set-cookie"]).toBeDefined();
-      adminCookie = Array.isArray(res.headers["set-cookie"])
-        ? res.headers["set-cookie"]
-        : [res.headers["set-cookie"]];
 
-        const result = await request(app)
-        .get("/api/v1/admin/all")
-        .set("Cookie", adminCookie);
 
-      expect(result.status).toBe(200);
-      expect(result.body).toHaveProperty(
-        "message",
-        "Users retrieved successfully"
-      );
-      expect(result.body).toHaveProperty("data");
-      expect(Array.isArray(result.body.data.users)).toBe(true);
-    });
-
- 
-  });
-
-  describe("GET /api/v1/admin/userdata/:username",()=>{
-    it("should login the admin", async () => {
+  describe("GET /api/v1/models",()=>{
+    it("should login the admin and get all the models", async () => {
         const res = await request(app).post("/api/v1/auth/login").send({
           username: "admin2",
           password: "123456",
@@ -84,22 +58,17 @@ describe("admin routes", () => {
           : [res.headers["set-cookie"]];
 
           const result = await request(app)
-          .get(`/api/v1/admin/userdata/user`)
+          .get(`/api/v1/models`)
           .set("Cookie", adminCookie);
 
           expect(result.status).toBe(200)
-          expect(result.body).toHaveProperty("data")
-          expect(result.body).toHaveProperty(
-              "message",
-              "User retrieved successfully"
-            );
-
+         
       });
   
   })
 
-  describe("GET /api/v1/admin/schema/all'",()=>{
-    it("should login the admin", async () => {
+  describe("POST /api/v1/models",()=>{
+    it("should login the admin and create a model", async () => {
         const res = await request(app).post("/api/v1/auth/login").send({
           username: "admin2",
           password: "123456",
@@ -111,12 +80,113 @@ describe("admin routes", () => {
           : [res.headers["set-cookie"]];
 
           const result = await request(app)
-          .get(`/api/v1/admin/schema/all`)
+          .post(`/api/v1/models`).send({
+            name: "TestModel",
+          })
           .set("Cookie", adminCookie);
-  
-          expect(result.status).toBe(200)
-      });
 
-   
+          expect(result.status).toBe(200)
+          expect(result.body.message).toBe('Model created successfully')
+         
+      });
+  
   })
+
+  describe("POST /api/v1/models",()=>{
+    it("should login the admin and add a feild rollNumber to testModal", async () => {
+        const res = await request(app).post("/api/v1/auth/login").send({
+          username: "admin2",
+          password: "123456",
+        });
+        expect(res.status).toBe(200);
+        expect(res.headers["set-cookie"]).toBeDefined();
+        adminCookie = Array.isArray(res.headers["set-cookie"])
+          ? res.headers["set-cookie"]
+          : [res.headers["set-cookie"]];
+
+          const result = await request(app)
+          .post(`/api/v1/models/TestModel__Dyn/fields`).send({
+        
+          
+              "type":"Number",
+              "name":"rollNumber",
+              "required":true,
+         
+            
+         
+        
+          })
+          .set("Cookie", adminCookie);
+
+          expect(result.status).toBe(200)
+          expect(result.body.message).toBe('Field added successfully')
+         
+      });
+  
+  })
+
+  describe("POST /api/v1/models",()=>{
+    it("should login the admin and add a record  to testModal", async () => {
+        const res = await request(app).post("/api/v1/auth/login").send({
+          username: "admin2",
+          password: "123456",
+        });
+        expect(res.status).toBe(200);
+        expect(res.headers["set-cookie"]).toBeDefined();
+        adminCookie = Array.isArray(res.headers["set-cookie"])
+          ? res.headers["set-cookie"]
+          : [res.headers["set-cookie"]];
+
+          const result = await request(app)
+          .post(`/api/v1/records/`).send({
+        
+          
+              "type":"Number",
+              "name":"rollNumber",
+              "required":true,
+         
+            
+         
+        
+          })
+          .set("Cookie", adminCookie);
+
+          expect(result.status).toBe(200)
+          expect(result.body.message).toBe('Field added successfully')
+         
+      });
+  
+  })
+
+  // describe("GET /api/v1/records/",()=>{
+  //   it("should login the admin and get all records from testModal", async () => {
+  //     const res = await request(app).post("/api/v1/auth/login").send({
+  //       username: "admin2",
+  //       password: "123456",
+  //     });
+  //     expect(res.status).toBe(200);
+  //     expect(res.headers["set-cookie"]).toBeDefined();
+  //     adminCookie = Array.isArray(res.headers["set-cookie"])
+  //       ? res.headers["set-cookie"]
+  //       : [res.headers["set-cookie"]];
+
+  //       const result = await request(app)
+  //       .post(`/api/v1/records/`).send({
+      
+        
+  //           "type":"Number",
+  //           "name":"rollNumber",
+  //           "required":true,
+       
+          
+       
+      
+  //       })
+  //       .set("Cookie", adminCookie);
+
+  //       expect(result.status).toBe(200)
+  //   })
+  // })
+
+
 });
